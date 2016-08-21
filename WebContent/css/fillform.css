@@ -1,0 +1,6 @@
+@CHARSET "UTF-8";
+table{text-align:center; margin-left:1%; width:98%; border:1px solid lightblue}
+   table td{border-left:1px solid lightblue; border-top:1px solid lightblue;}
+   table th{border-right:1px solid lightblue}
+   td input{text-align:center; border:1px solid; height:20px; width:80px;}
+   tr{height:35px;}

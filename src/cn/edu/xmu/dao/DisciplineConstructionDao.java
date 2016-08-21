@@ -1,0 +1,77 @@
+package cn.edu.xmu.dao;
+
+
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import cn.edu.xmu.entity.DisciplineConstruction;
+import cn.edu.xmu.entity.SchoolExecutiveUnit;
+import cn.edu.xmu.entity.SuperMajor;
+
+
+/**
+ * 
+ * @author Gy
+ * 表4-1-1 学科建设 (时点)
+ */
+public interface DisciplineConstructionDao {
+
+	
+	/**
+	 * 插入数据
+	 * 
+	 * @param seu
+	 * 		学校相关行政单位实体
+	 * @return 
+	 * 		插入数据结果成功与否
+	 */
+	public int addRecord(DisciplineConstruction dc);
+	
+	
+	/**
+	 * 
+	 * @param seuids
+	 * @return
+	 * @throws SQLException
+	 */
+	boolean batchDelete(String[] seuids) throws SQLException;
+	
+	/**
+	 * 
+	 * @param valueMap
+	 * @param id
+	 * @return
+	 */
+	public int alterDisciplineConstruction(Map<String, String> valueMap, String id);
+	
+	/**
+	 * 
+	 * @param queryParams
+	 * @return 
+	 * 		根据查询条件返回符合条件的条数
+	 */
+	public int getDisciplineConstructionCount(Map queryParams);
+	
+	
+	/**
+	 * 
+	 * @param start  开始的标记
+	 * @param end    结束的标记
+	 * @param sortStr 排序的字段
+	 * @param orderStr 升降选项
+	 * @param queryParams 查询参数
+	 * @return
+	 */
+	 public List<DisciplineConstruction> getAllDisciplineConstruction(int start, int end,
+				String sortStr, String orderStr, Map queryParams);
+
+
+	List<DisciplineConstruction> getAllDisciplineConstruction();
+
+
+	void deleteByCollegeandDeadline(String college, Date deadline)
+			throws SQLException;
+	 
+}

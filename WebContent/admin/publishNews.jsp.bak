@@ -1,0 +1,139 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>发布消息</title>
+<link href="<%=basePath%>/css/style.css" rel="stylesheet" type="text/css" />
+<link href="<%=basePath%>/css/select.css" rel="stylesheet" type="text/css" />
+
+<script type='text/javascript' src='/IQA/dwr/interface/MenuDao.js'></script>
+<script type='text/javascript' src='/IQA/dwr/engine.js'></script>
+<script type='text/javascript' src='/IQA/dwr/util.js'></script>
+
+<script type="text/javascript" src="<%=basePath%>/js/jquery.js"></script>
+<script type="text/javascript" src="<%=basePath%>/js/select-ui.min.js"></script>
+<script type="text/javascript" src="<%=basePath%>/js/jquery.idTabs.min.js"></script>
+<script type="text/javascript" src="<%=basePath%>/editor/kindeditor.js"></script>
+<script type="text/javascript">
+    KE.show({
+        id : 'content7',
+        cssPath : '../index.css'
+    });
+</script>
+
+<script type="text/javascript">
+	function getmenu(){
+		
+		//document.getElementById("n_menubar").options.length = 0;
+		MenuDao.getAllMenu(function callback(data){ 
+			for(o in data){
+				document.getElementById("n_menubar").options.add(new Option(data[o].mb_ch_name,data[o].mb_id));
+			}
+		});
+	}
+	
+</script>
+ 
+<script type="text/javascript">
+$(document).ready(function(e) {
+    $(".select1").uedSelect({
+		width : 180			  
+	});
+    getmenu();
+});
+
+$(function() {
+/* 注册添加按钮的点击事件 */
+	$("#addFile").click(addFile);
+
+});
+var addFile = function() {
+
+	var $file = $("<input type='file' name='UplodeName'/>");
+	$("#fileUplodeDiv").append($file).append($("<br>"));
+};
+
+
+</script>
+
+
+
+</head>
+
+<body>
+    <div class="place">
+       <span>位置：</span>
+       <ul class="placeul">
+          <li><a href="#">首页</a></li>
+          <li><a href="#">系统设置</a></li>
+       </ul>
+    </div>
+   
+    <div class="formbody">      
+     <div id="usual1" class="usual">      
+  	 <div id="tab1" class="tabson">
+             <div class="formtext">Hi，<b>admin</b>，欢迎您使用新闻发布功能！</div>
+             <form action="<%=basePath%>publishnews" method="post" enctype="multipart/form-data">
+               <ul class="forminfo">
+               
+                <li>
+                	<label>所属栏目<b>*</b></label>
+                	<div class="vocation">
+                	<div class="uew-select">
+                		<select class="select1" name="n_menubar" id = "n_menubar">
+                			<option selected="selected">请选择所属栏目</option> 
+                		</select>
+                	</div>
+                	</div>
+                	
+                	<label>选择语言<b>*</b></label>
+                	<div class="vocation">
+                	<div class="uew-select">
+                	    <div class="uew-select-value ue-state-default" style="width:180px;">
+                	       <em class="uew-select-text">请选择语言dddddddd</em>
+                	       <em class="uew-icon uew-icon-triangle-1-s"></em>
+                	    </div>
+                		<select class="select1" name="n_version" id = "n_version">
+                			<option >中文</option> 
+                			<option >English</option> 
+                		</select>
+                	</div>
+                	</div>
+               </li>
+              
+               <li>
+                	<label>新闻标题<b>*</b></label>
+                	<input class="dfinput" name="n_titles" type="text"  placeholder="请填写新闻标题" style="width:518px;"/>
+               </li>
+               <li>
+               		<label>新闻作者<b>*</b></label>
+               		<input class="dfinput" name="n_author" type="text"  placeholder="请填写新闻作者"  style="width:518px;"/>
+               </li>	
+   
+               <li><label>通知内容<b>*</b></label>
+                   <textarea id="content7" name="n_content" style="width:700px;height:250px;visibility:hidden;"></textarea>
+               </li>
+               <li><label>添加图片<b>*</b></label><input type="button"	value="添加图片" id="addFile" ></li>
+               <li>
+                   <input type="file" name="UplodeName" value="">
+				   <div id="fileUplodeDiv"></div>
+               </li>
+               <li><label>&nbsp;</label><input name="Submit" type="submit" value="提交"/></li>
+              </ul>
+             </form>
+       </div> 
+       </div>        
+    </div> 
+        <script type="text/javascript"> 
+         $("#usual1 ul").idTabs(); 
+        </script>
+
+</body>
+
+</html>

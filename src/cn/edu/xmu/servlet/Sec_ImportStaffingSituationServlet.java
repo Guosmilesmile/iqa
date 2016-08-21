@@ -1,0 +1,198 @@
+package cn.edu.xmu.servlet;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+
+import jxl.Sheet;
+import jxl.Workbook;
+
+import com.jspsmart.upload.SmartUpload;
+import com.jspsmart.upload.SmartUploadException;
+
+import cn.edu.xmu.dao.StaffingSituationDao;
+import cn.edu.xmu.dao.TableListDao;
+import cn.edu.xmu.daoimpl.StaffingSituationDaoImpl;
+import cn.edu.xmu.daoimpl.TableListDaoImpl;
+import cn.edu.xmu.entity.StaffingSituation;
+
+/**
+ * Servlet implementation class Sec_ImportStaffingSituationServlet
+ */
+@WebServlet("/Sec_ImportStaffingSituationServlet")
+public class Sec_ImportStaffingSituationServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	private static String result;
+	private static int errorrow = 1;
+	private static String college;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public Sec_ImportStaffingSituationServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request, response);
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;Charset=UTF-8");
+		String tableid = request.getParameter("tableid");
+	    college = request.getParameter("college");
+		college = URLDecoder.decode(college, "utf-8");
+		int recordcount = 0;
+		List<StaffingSituation> tsList = new ArrayList<StaffingSituation>();
+
+		TableListDao tableListDao = new TableListDaoImpl();
+		StaffingSituationDao teachScientificDao = new StaffingSituationDaoImpl();
+
+		String tablename = tableListDao.getTablename(tableid);
+		System.out.println(tablename);
+		String filePath = getServletContext().getRealPath("/")
+				+ "/uploadModelTable/";
+		String completeFilePath;// excel文件的完整路径
+		File file = new File(filePath);
+		if (!file.exists()) {
+			file.mkdir();
+		}
+		result = "导入成功";
+		SmartUpload smartUpload = new SmartUpload();
+		smartUpload.initialize(getServletConfig(), request, response);
+		smartUpload.setMaxFileSize(1024 * 1024 * 10);
+		smartUpload.setTotalMaxFileSize(1024 * 1024 * 100);
+		smartUpload.setAllowedFilesList("txt,jpg,png,gif,doc,xlsx,xls");
+		try {
+			smartUpload.setDeniedFilesList("rar,jsp,html");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			result = "上传失败";
+		}
+		try {
+			smartUpload.upload();
+			int count = 0;
+			count = smartUpload.save(filePath);
+			com.jspsmart.upload.File myFile = smartUpload.getFiles().getFile(0);
+			completeFilePath = filePath + "\\" + myFile.getFileName();
+			System.out.println(completeFilePath);
+			if (tablename.equals("附表6-1-8-2大学生创业教育与就业教育指导机构的专职人员配备情况")) {
+				tsList = getAlltsByExcel(completeFilePath);
+				teachScientificDao.deleteByCollegeandDeadline(college, null);
+				recordcount = tsList.size();
+				for (int i = 0; i < tsList.size(); i++) {
+					teachScientificDao.addRecord(tsList.get(i));
+				}
+			}
+		} catch (SmartUploadException e) {
+			e.printStackTrace();
+			result = "上传失败";
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("上传失败");
+		}
+		
+		if(result.equals("导入成功"))
+		{
+			request.setAttribute("result", result);
+		    request.setAttribute("count", recordcount);
+		    request.getRequestDispatcher("upTest/uploadtest.jsp").forward(request,
+				response);
+		}else{
+			request.setAttribute("result", result);
+			request.setAttribute("errorrow", errorrow);
+		    request.getRequestDispatcher("upTest/error.jsp").forward(request,
+				response);
+		}
+	}
+	/**
+	 * 得到Excel表格里面的数据
+	 * @param file
+	 * @return
+	 */
+	public static List<StaffingSituation> getAlltsByExcel(String file) {
+		errorrow = 1;
+		List<StaffingSituation> tsList = new ArrayList<StaffingSituation>();
+		try {
+			Workbook rwb = Workbook.getWorkbook(new File(file));
+			Sheet rs = rwb.getSheet(0);// 或者rwb.getSheet(0)
+			int rows = getRightRows(rs);// 得到所有的行
+			for (int i = 2; i < rows; i++) {
+				for (int j = 0; j < 5; j++) {
+					// 第一个是列数，第二个是行数
+					String ss_condition1 = rs.getCell(j++, i).getContents();// 默认最左边编号也算一列,所以这里得j++
+					String ss_condition2 = rs.getCell(j++, i).getContents();
+					
+					String teachercount = rs.getCell(j++, i).getContents();
+					int ss_teachercount = -999;
+					if(!teachercount.equals(""))
+						ss_teachercount = Integer.valueOf(teachercount);
+					
+					String fulltimestaffcount = rs.getCell(j++, i).getContents();
+					int ss_fulltimestaffcount = -999;
+					if(!fulltimestaffcount.equals(""))
+						ss_fulltimestaffcount = Integer.valueOf(fulltimestaffcount);
+					
+					String facultycount = rs.getCell(j++, i).getContents();
+					int ss_facultycount = -999;
+					if(!facultycount.equals(""))
+						ss_facultycount = Integer.valueOf(facultycount);
+					//添加修改点击保存的时候需要判断,0表示完整，1表示缺失
+					int isnull = 0;
+					if(ss_condition1.equals("") || ss_condition2.equals("") || teachercount.equals("") || 
+							fulltimestaffcount.equals("") || facultycount.equals("") )
+						isnull = 1;
+					
+					tsList.add(new StaffingSituation(ss_condition1, ss_condition2, ss_teachercount,ss_fulltimestaffcount,ss_facultycount, college,isnull));
+				}
+				errorrow++;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = "导入失败";
+		}
+		return tsList;
+	}
+
+	// 返回去掉空行的记录数
+	private static int getRightRows(Sheet sheet) {
+		int rsCols = sheet.getColumns(); // 列数
+		int rsRows = sheet.getRows(); // 行数
+		int nullCellNum;
+		int afterRows = rsRows;
+		for (int i = 1; i < rsRows; i++) { // 统计行中为空的单元格数
+			nullCellNum = 0;
+			for (int j = 0; j < rsCols; j++) {
+				String val = sheet.getCell(j, i).getContents();
+				val = StringUtils.trimToEmpty(val);
+				if (StringUtils.isBlank(val))
+					nullCellNum++;
+			}
+			if (nullCellNum >= rsCols) { // 如果nullCellNum大于或等于总的列数
+				afterRows--; // 行数减一
+			}
+		}
+		return afterRows;
+	}
+
+}

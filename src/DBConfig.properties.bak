@@ -1,0 +1,4 @@
+driver=com.mysql.jdbc.Driver
+url=jdbc:mysql://59.77.13.234:3306/xmuiqa?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false
+username=iqa
+password=iqa123456
